@@ -1,11 +1,10 @@
 package main
 
 import (
+	utils "aoc2022/libs"
 	"bufio"
 	"fmt"
-	"log"
 	"os"
-	"strconv"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		integar := Ints(scanner.Text()) * 811589153
+		integar := utils.Ints(scanner.Text()) * 811589153
 		order = append(order, []int{len(nums), integar})
 		nums = append(nums, integar)
 	}
@@ -70,14 +69,6 @@ func main() {
 
 	fmt.Printf("ans:%v\n", order[index1000][1]+order[index2000][1]+order[index3000][1])
 
-}
-
-func Ints(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
 }
 
 func mod(a, b int) int {

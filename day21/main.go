@@ -1,11 +1,10 @@
 package main
 
 import (
+	utils "aoc2022/libs"
 	"bufio"
 	"fmt"
-	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -34,7 +33,7 @@ func main() {
 		name := line[0][:4]
 		names = append(names, name)
 		if len(line) == 2 { //only num
-			n := Ints(line[1])
+			n := utils.Ints(line[1])
 			allM[name] = monkey{n, []string{}, "NA"}
 		}
 		if len(line) == 4 {
@@ -125,12 +124,4 @@ func main() {
 
 	fmt.Println(ans)
 
-}
-
-func Ints(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
 }

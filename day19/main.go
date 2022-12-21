@@ -1,11 +1,10 @@
 package main
 
 import (
+	utils "aoc2022/libs"
 	"bufio"
 	"fmt"
-	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -33,11 +32,11 @@ func main() {
 	for scanner.Scan() {
 		var a blueprint
 		line := strings.Split(scanner.Text(), " ")
-		a.id = Ints(strings.TrimSuffix(line[1], ":"))
-		a.orebot = Ints(line[6])
-		a.claybot = Ints(line[12])
-		a.obsidianbot = []int{Ints(line[18]), Ints(line[21])}
-		a.geodebot = []int{Ints(line[27]), Ints(line[30])}
+		a.id = utils.Ints(strings.TrimSuffix(line[1], ":"))
+		a.orebot = utils.Ints(line[6])
+		a.claybot = utils.Ints(line[12])
+		a.obsidianbot = []int{utils.Ints(line[18]), utils.Ints(line[21])}
+		a.geodebot = []int{utils.Ints(line[27]), utils.Ints(line[30])}
 		allBlueprints = append(allBlueprints, a)
 
 	}
@@ -52,14 +51,6 @@ func main() {
 
 	}
 	fmt.Println(ans)
-}
-
-func Ints(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
 }
 
 func calculate(b blueprint) int {
