@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	utils "../libs"
+	utils "aoc2022/libs"
 )
 
 var nonZeroValves []string
@@ -77,9 +77,9 @@ func readInput(s string) map[string]valve {
 func floydwarshall(allValves map[string]valve) map[string]map[string]int {
 	edges := make(map[string]map[string]int)
 
-	for k, _ := range allValves {
+	for k := range allValves {
 		edges[k] = make(map[string]int)
-		for k2, _ := range allValves {
+		for k2 := range allValves {
 			edges[k][k2] = 100000
 		}
 	}
