@@ -1,12 +1,13 @@
 package main
 
 import (
-	utils "aoc2022/libs"
 	"bufio"
 	"fmt"
 	"os"
 	"sort"
 	"strings"
+
+	utils "../libs"
 )
 
 var nonZeroValves []string

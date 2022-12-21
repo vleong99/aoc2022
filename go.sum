@@ -1,0 +1,6 @@
+github.com/bendiscz/aoc v0.0.0-20221220081141-65e067565ecc h1:T38nKVqO6shMlxWg3PjSNJ9/2Ic/HvlvI3IyjPBjFNU=
+github.com/bendiscz/aoc v0.0.0-20221220081141-65e067565ecc/go.mod h1:xoKdK58g2eZDhbtu8RKvfYeaNuGUYyZ0nq7mTba1jOQ=
+github.com/jasontconnell/advent v1.1.2 h1:GKYTXxoFHfGyLvIKxcBmqsS5wPT28vLjaJih59bsFl8=
+github.com/jasontconnell/advent v1.1.2/go.mod h1:3cYme2zYiid2C7PhhuihDvQOH3R8b2UgJfjG7debZWk=
+golang.org/x/exp v0.0.0-20221126150942-6ab00d035af9 h1:yZNXmy+j/JpX19vZkVktWqAo7Gny4PBWYYK3zskGpx4=
+golang.org/x/exp v0.0.0-20221126150942-6ab00d035af9/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
