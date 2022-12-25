@@ -107,7 +107,6 @@ func main() {
 		}
 		if curr.p[1] == prev {
 			fixed := allM[curr.p[0]].num
-
 			switch curr.op {
 			case "+":
 				ans -= fixed
