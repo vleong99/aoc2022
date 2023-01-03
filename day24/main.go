@@ -17,9 +17,7 @@ type node struct {
 
 var allB []b
 
-var allBStates [][]b
-
-var allW [][2]int
+var allBStates map[int]map[[2]int]bool
 
 var rows, cols, LCM int
 
@@ -40,9 +38,6 @@ func main() {
 
 	for i := 0; i < len(eachLine); i++ {
 		for j := 0; j < len(eachLine[i]); j++ {
-			if eachLine[i][j] == '#' {
-				allW = append(allW, [2]int{i, j})
-			}
 			if eachLine[i][j] == '>' || eachLine[i][j] == '<' || eachLine[i][j] == '^' || eachLine[i][j] == 'v' {
 				newB := b{i, j, "NA"}
 				switch eachLine[i][j] {
@@ -62,22 +57,18 @@ func main() {
 
 	LCM = findLCM(rows-2, cols-2) //lowest common denominator
 
+	allBStates = make(map[int]map[[2]int]bool)
+
 	for i := 0; i < LCM; i++ {
-		allBStates = append(allBStates, newB(allB, i))
+		allBStates[i] = newB(allB, i)
 	}
 
 	a := shortestPath(start, end, 0)
-
 	b := shortestPath(end, start, a) - a
-
 	c := shortestPath(start, end, a+b) - (a + b)
 
 	fmt.Println(a, b, c)
-
 	fmt.Println(a + b + c)
-
-	// shortestPath(end, start)
-
 }
 
 func findLCM(a, b int) int { //find least common multiple
@@ -93,39 +84,35 @@ func findLCM(a, b int) int { //find least common multiple
 func shortestPath(start, end [2]int, turn int) int {
 	var queue []node
 
-	var seen []node
+	seen := make(map[[3]int]bool)
 
-	//append start node
-
-	queue = append(queue, node{start[0], start[1], turn})
-
-	//process BFS
+	queue = append(queue, node{start[0], start[1], turn}) //append start node
 
 	moves := [][]int{{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}}
 
 	for len(queue) > 0 {
+
 		curr := queue[0]
 		queue = queue[1:]
 
-		cB := &allBStates[curr.pathLength%LCM]
+		cB := allBStates[curr.pathLength%LCM]
 
 		for _, m := range moves {
-
-			if curr.row+(m[0]) < 1 || curr.row+(m[0]) > rows-2 || curr.col+(m[1]) < 1 || curr.col+(m[1]) > cols-2 {
-				if !((curr.row+(m[0]) == end[0] && curr.col+(m[1]) == end[1]) || (curr.row+(m[0]) == start[0] && curr.col+(m[1]) == start[1])) {
-					continue
-				}
-			}
 			next := node{curr.row + (m[0]), curr.col + (m[1]), curr.pathLength + 1}
 
 			if next.row == end[0] && next.col == end[1] {
 				return next.pathLength - 1
 			}
 
-			if !blizzard(*cB, [2]int{next.row, next.col}) && !seenNode(seen, next) {
+			if next.row < 1 || next.row > rows-2 || next.col < 1 || next.col > cols-2 {
+				if !(next.row == start[0] && next.col == start[1]) {
+					continue
+				}
+			}
+
+			if !cB[[2]int{next.row, next.col}] && !seen[[3]int{next.col, next.row, next.pathLength}] {
 				queue = append(queue, next)
-				seen = append(seen, next)
-				fmt.Println(next)
+				seen[[3]int{next.col, next.row, next.pathLength}] = true
 			}
 		}
 	}
@@ -141,20 +128,9 @@ func blizzard(b []b, new [2]int) bool {
 	return false
 }
 
-func seenNode(s []node, n node) bool {
-	for i := 0; i < len(s); i++ {
-		if s[i].row == n.row && s[i].col == n.col && s[i].pathLength == n.pathLength {
-			return true
-		}
-	}
-	return false
-}
+func newB(blizzards []b, turn int) map[[2]int]bool {
 
-func newB(blizzards []b, turn int) []b {
-
-	newBlizzards := []b{}
-
-	newBlizzards = append(newBlizzards, blizzards...)
+	bState := make(map[[2]int]bool)
 
 	turnRow := turn % (rows - 2)
 
@@ -185,8 +161,7 @@ func newB(blizzards []b, turn int) []b {
 				new[1] = (v.c + turnCol) - (cols - 2)
 			}
 		}
-		(newBlizzards)[i].r = new[0]
-		(newBlizzards)[i].c = new[1]
+		bState[[2]int{new[0], new[1]}] = true
 	}
-	return newBlizzards
+	return bState
 }
