@@ -1,132 +1,192 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"io/ioutil"
+	"strings"
 )
 
-type row struct {
-	right, left []int
+type b struct { // blizzard
+	r, c int    //coords
+	dir  string //direction
 }
 
-type col struct {
-	up, down []int
+type node struct {
+	row, col, pathLength int
 }
 
-var allRows []row
+var allB []b
 
-var allCols []col
+var allBStates [][]b
+
+var allW [][2]int
+
+var rows, cols, LCM int
 
 func main() {
 
-	grid := make(map[[2]int]byte)
-
-	file, err := os.Open("day24.txt")
+	input, err := ioutil.ReadFile("day24.txt")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	defer file.Close()
+	eachLine := strings.Split(string(input), "\n")
 
-	rows := 0
-	cols := 0
+	rows = len(eachLine) //row length
 
-	for i := 0; i < 8; i++ {
-		allCols = append(allCols, col{[]int{}, []int{}})
-	}
+	cols = len(eachLine[0]) //col length
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		allRows = append(allRows, row{[]int{}, []int{}})
-		line := scanner.Text()
-		cols = len(line)
-		for i := 0; i < len(line); i++ {
-			grid[[2]int{rows, i}] = line[i]
-			switch line[i] {
-			case '>':
-				allRows[rows].right = append(allRows[rows].right, i)
-			case '<':
-				allRows[rows].left = append(allRows[rows].left, i)
-			case '^':
-				allCols[i].up = append(allCols[i].up, rows)
-			case 'v':
-				allCols[i].down = append(allCols[i].down, rows)
+	start, end := [2]int{0, 1}, [2]int{rows - 1, cols - 2}
+
+	for i := 0; i < len(eachLine); i++ {
+		for j := 0; j < len(eachLine[i]); j++ {
+			if eachLine[i][j] == '#' {
+				allW = append(allW, [2]int{i, j})
+			}
+			if eachLine[i][j] == '>' || eachLine[i][j] == '<' || eachLine[i][j] == '^' || eachLine[i][j] == 'v' {
+				newB := b{i, j, "NA"}
+				switch eachLine[i][j] {
+				case '>':
+					newB.dir = "R"
+				case '<':
+					newB.dir = "L"
+				case '^':
+					newB.dir = "U"
+				case 'v':
+					newB.dir = "D"
+				}
+				allB = append(allB, newB)
 			}
 		}
-		rows++
 	}
 
-	//track length of path
-	turn := 0
+	LCM = findLCM(rows-2, cols-2) //lowest common denominator
 
-	//initialise queue and append start coords
-	start := [2]int{0, 1}
-	var queue [][2]int
-	queue = append(queue,[2]int{0, 1})
-
-	moves := [][]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
-
-	for len(queue) > 0 {
-		turn++
-		curr := queue[0]
-		queue = queue[1:]
-		if curr == [2]int{5,6} {
-			fmt.Println(turn)
-			break
-		}
-		for _, m := range moves {
-			pM := [2]int{curr[0]+m[0], curr[1]+m[1]} //potential move
-			if curr[0]+m[0] < 1 || curr[0]+m[0] > 4 || curr[1]+m[1] < 1 || curr[1]+m[1] > 6 {
-				if curr[0]+m[0] == 5 && curr[1]+m[1] == 6 {
-					queue = append(queue, [2]int{curr[0]+m[0],curr[1]+m[1]})
-				}
-				continue
-			}
-		}
-
+	for i := 0; i < LCM; i++ {
+		allBStates = append(allBStates, newB(allB, i))
 	}
 
-	
-			for _, m := range moves {
-	
-				if curr.row+(m[0]) < 0 || curr.row+(m[0]) > len(grid)-1 || curr.col+(m[1]) < 0 || curr.col+(m[1]) > len(grid[0])-1 {
-					continue
-				}
-				next := &grid[curr.row+(m[0])][curr.col+(m[1])]
-				if valid(&grid, []int{curr.row, curr.col}, []int{next.row, next.col}) && next.pathLength == 0 {
-					next.pathLength = curr.pathLength + 1
-					queue = append(queue, *next)
-				}
-			}
-	
-		}
-		return -1
-	}
-	
+	a := shortestPath(start, end, 0)
 
+	b := shortestPath(end, start, a) - a
 
-	// grid[[2]int{0, 1}] = 'E'
+	c := shortestPath(start, end, a+b) - (a + b)
 
-	// for i := 0; i < rows; i++ {
-	// 	for j := 0; j < cols; j++ {
-	// 		fmt.Print(string(grid[[2]int{i, j}]))
-	// 	}
-	// 	fmt.Println()
-	// }
+	fmt.Println(a, b, c)
 
-	// fmt.Println(allRows)
+	fmt.Println(a + b + c)
 
-	// fmt.Println(allCols)
+	// shortestPath(end, start)
 
 }
 
+func findLCM(a, b int) int { //find least common multiple
+	i := 1
+	for {
+		if i%a == 0 && i%b == 0 {
+			return i
+		}
+		i++
+	}
+}
 
-func contains(b[]int, curr int ) bool {
+func shortestPath(start, end [2]int, turn int) int {
+	var queue []node
+
+	var seen []node
+
+	//append start node
+
+	queue = append(queue, node{start[0], start[1], turn})
+
+	//process BFS
+
+	moves := [][]int{{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		cB := &allBStates[curr.pathLength%LCM]
+
+		for _, m := range moves {
+
+			if curr.row+(m[0]) < 1 || curr.row+(m[0]) > rows-2 || curr.col+(m[1]) < 1 || curr.col+(m[1]) > cols-2 {
+				if !((curr.row+(m[0]) == end[0] && curr.col+(m[1]) == end[1]) || (curr.row+(m[0]) == start[0] && curr.col+(m[1]) == start[1])) {
+					continue
+				}
+			}
+			next := node{curr.row + (m[0]), curr.col + (m[1]), curr.pathLength + 1}
+
+			if next.row == end[0] && next.col == end[1] {
+				return next.pathLength - 1
+			}
+
+			if !blizzard(*cB, [2]int{next.row, next.col}) && !seenNode(seen, next) {
+				queue = append(queue, next)
+				seen = append(seen, next)
+				fmt.Println(next)
+			}
+		}
+	}
+	return -1
+}
+
+func blizzard(b []b, new [2]int) bool {
 	for _, v := range b {
-		if curr == v {
+		if v.r == new[0] && v.c == new[1] {
 			return true
 		}
 	}
 	return false
+}
+
+func seenNode(s []node, n node) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i].row == n.row && s[i].col == n.col && s[i].pathLength == n.pathLength {
+			return true
+		}
+	}
+	return false
+}
+
+func newB(blizzards []b, turn int) []b {
+
+	newBlizzards := []b{}
+
+	newBlizzards = append(newBlizzards, blizzards...)
+
+	turnRow := turn % (rows - 2)
+
+	turnCol := turn % (cols - 2)
+
+	for i := 0; i < len(blizzards); i++ {
+		v := (blizzards)[i]
+		new := [2]int{v.r, v.c}
+		switch v.dir {
+		case "U":
+			new[0] = v.r - turnRow
+			if (v.r - turnRow) < 1 {
+				new[0] = (rows - 2) + (v.r - turnRow)
+			}
+		case "D":
+			new[0] = v.r + turnRow
+			if (v.r + turnRow) > rows-2 {
+				new[0] = (v.r + turnRow) - (rows - 2)
+			}
+		case "L":
+			new[1] = v.c - turnCol
+			if (v.c - turnCol) < 1 {
+				new[1] = (cols - 2) + (v.c - turnCol)
+			}
+		case "R":
+			new[1] = v.c + turnCol
+			if (v.c + turnCol) > cols-2 {
+				new[1] = (v.c + turnCol) - (cols - 2)
+			}
+		}
+		(newBlizzards)[i].r = new[0]
+		(newBlizzards)[i].c = new[1]
+	}
+	return newBlizzards
 }
